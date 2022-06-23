@@ -1,0 +1,173 @@
+---
+title: "Trabajo Final Bayesiana"
+output:
+  html_document:
+    df_print: paged
+editor_options:
+  chunk_output_type: console
+---
+
+```{r}
+# Librerias y configuraciones iniciales:
+library(tidyverse)
+library(magrittr)
+library(janitor)
+library(readr)
+library(bayesplot)
+theme_set(bayesplot::theme_default(base_family = "sans"))
+library(brms)
+```
+
+# Lectura y modificación de la base de datos:
+
+```{r dataset}
+df <- read_csv("dataset.csv")
+df$assess_c %<>%  as.factor()
+df$cancer_c %<>%  as.factor()
+df$density_c %<>%  as.factor()
+df$famhx_c %<>%  as.factor()
+
+n=dim(df)[1]
+p=dim(df)[2]
+
+print(paste0("number of observations = ", n))
+
+print(paste0("number of predictors = ", p))
+```
+
+
+# Analisís descriptivo
+
+**Crear en Radiant**
+
+# Creación del modelo base
+
+Aqui se crea el modelo base, es decir, es una construcción con todas las variables de respueta del modelo (previamente tratadas y modificadas según las necesidades apriori de la creación del modelo.) 
+
+```{r model1}
+# Modelo logístico binario (Bernoulli), en base de RStan:
+# Son 15.000 iteraciones por cadena, con un burning (warmup) de las primeras 3000 iteraciones
+# Son 3 cadenas
+# se fija una semilla para mantener los resultados
+# según el dia o el equipo a correr el modelo
+model2 <- brm(formula = cancer_c ~ age_c + assess_c + famhx_c + density_c +bmi_c,
+             data=df, 
+             family = bernoulli(link = "logit"),
+             warmup = 3000, 
+             iter = 15000, 
+             chains = 3, 
+             inits= "0", 
+             cores=2,
+             seed = 123)
+```
+
+
+El modelo nos arroja lo siguiente:
+
+```{r summary}
+# Son dos formas de resumen del modelo ajustado:
+model2$fit
+summary(model2)
+```
+
+> Nota: el modelo tomo como indice las primeras catecorias de cada variable categorica.
+
+Aqui podemos que muchas de los parametros no sosn significativos en gran medida, es decir, sus IC son muy cercanos a 0.
+
+Otra cosa a notar es que el Rhat fue de 1 en todos los parametros, por lo que así a grosso modo notamos una convergencia de estos hacia la variable de respuesta.
+
+# Evaluación del modelo
+
+Para evaular este modelo tendremos varias formas, la mayoria son diagnosticos
+visuales para una mejor claridad del valor del modelo.
+
+## HDI 
+
+```{r HDI}
+name <- paste0("b_",model2[["prior"]][["coef"]])[c(-1,-14)]
+color_scheme_set("red")
+mcmc_intervals(model2$fit, pars = name)
+```
+
+Aqui podemos ver los HDI de los parametros estimados en el modelo.
+
+
+## Rhat
+
+Dado que el **Rhat** sirve como una medida para observar la convergencia de cada uno de los parametros
+
+```{r rhat}
+rhats2 <- rhat(model2)
+print(rhats2)
+
+color_scheme_set("brightblue")
+mcmc_rhat(rhats2) + yaxis_text(hjust = 1)
+```
+
+Como podemos ver no tenemos valores extraños o fuera del valor central 1.
+
+## Neff/N
+
+```{r neff/n}
+ratios2 <- neff_ratio(model2)
+
+mcmc_neff(ratios2, size = 2) + yaxis_text(hjust = 1)
+```
+
+
+Estos valores concretos son arbitrarios, ya que no tienen un significado teórico particular, pero una heurística útil es preocuparse por cualquier neff/N inferior a 0,1.
+
+Los tamaños de muestra son mejores en la edad de la paciente, si IMC y sus posibles antecendentes de cancer en familiares de primer grado.
+
+## Trace plot
+
+```{r trace plot}
+#Función para graficar todos a la vez:
+compare_cp_ncp <- function(cp_plot, ncp_plot, ncol = 2, ...) {
+  bayesplot_grid(
+    cp_plot, ncp_plot, 
+    grid_args = list(ncol = ncol),
+    subtitles = c("Model 1", 
+                  "Model 2"),
+    ...
+  )
+}
+```
+
+
+```{r}
+i  = 1
+name
+color_scheme_set("mix-brightblue-gray")
+mcmc_trace(model2, pars = name) + 
+  xlab("Post-warmup iteration")
+```
+
+Aqui podemos ver como cada iteración cumple con lo esperado, una variación no tan amplia (en la mayoria de parametros, ya que en algunas iteraciones si podemos ver unos picos de mayor amplitud) y el comportamiento de las cadenas es estacionario en todos los graficos, además no vemos divergencias (si fuera así estarian marcadas de rojo), esto lo podemos ver en el siguiente grafico.
+
+## NUTS divergence
+
+```{r}
+lp2 <- log_posterior(model2)
+
+color_scheme_set("red")
+mcmc_nuts_divergence(np2, lp2)
+```
+
+Aqui podemos ver que las cadenas de Markov exploran una curvatura más complicada en la distribución del objetivo.
+
+Para el caso de la probabilidad de aceptación notamos unas colas más finas y un grafico con un tubo en forma de tornado por lo que nos dice que no hubo ratios bajos de aceptación, es decir, no tardo muchas iteraciones en dar saltos, pero en Modelos con algoritmos MCMC son aceptables, dado que la mayoria de las iteraciones mantuvieron convergencias lentas, esto es un modelo muy regular ya que apenas cumple con cabalidad los ratios de aceptación en casi siempre de 1.
+
+
+> Nos comienzan a dar indicios de el modelo no es el mejor, por lo que dentro de poco, veremos dos propuestas con diferentes 
+
+## Rank plot
+
+
+
+
+
+
+
+
+
