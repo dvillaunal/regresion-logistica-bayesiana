@@ -13,6 +13,7 @@ library(tidyverse)
 library(magrittr)
 library(janitor)
 library(readr)
+library(BayesFactor)
 library(bayesplot)
 theme_set(bayesplot::theme_default(base_family = "sans"))
 library(brms)
@@ -27,8 +28,8 @@ df$cancer_c %<>%  as.factor()
 df$density_c %<>%  as.factor()
 df$famhx_c %<>%  as.factor()
 
-n=dim(df)[1]
-p=dim(df)[2]
+n=dim(df0)[1]
+p=dim(df0)[2]
 
 print(paste0("number of observations = ", n))
 
@@ -38,7 +39,13 @@ print(paste0("number of predictors = ", p))
 
 # Analisís descriptivo
 
-**Crear en Radiant**
+```{r categoricos}
+df$assess_c %>%  table() %>% prop.table() %>% round(2) %>% as.data.frame()
+df$cancer_c %>%  table() %>% prop.table() %>% round(2) %>% as.data.frame()
+df$density_c %>%  table() %>% prop.table() %>% round(2) %>% as.data.frame()
+df$famhx_c %>%  table() %>% prop.table() %>% round(2) %>% as.data.frame()
+```
+
 
 # Creación del modelo base
 
@@ -50,8 +57,9 @@ Aqui se crea el modelo base, es decir, es una construcción con todas las variab
 # Son 3 cadenas
 # se fija una semilla para mantener los resultados
 # según el dia o el equipo a correr el modelo
-model2 <- brm(formula = cancer_c ~ age_c + assess_c + famhx_c + density_c +bmi_c,
-             data=df, 
+model2 <- brm(formula = cancer_c ~ age_c + assess_c + famhx_c + density_c
+              +bmi_c,
+              data=df, 
              family = bernoulli(link = "logit"),
              warmup = 3000, 
              iter = 15000, 
@@ -147,9 +155,9 @@ Aqui podemos ver como cada iteración cumple con lo esperado, una variación no 
 
 ## NUTS divergence
 
-```{r}
+```{r nuts divergence}
 lp2 <- log_posterior(model2)
-
+np2 <- nuts_params(model2)
 color_scheme_set("red")
 mcmc_nuts_divergence(np2, lp2)
 ```
@@ -161,13 +169,41 @@ Para el caso de la probabilidad de aceptación notamos unas colas más finas y u
 
 > Nos comienzan a dar indicios de el modelo no es el mejor, por lo que dentro de poco, veremos dos propuestas con diferentes 
 
-## Rank plot
+## Rank plot & Density overlay
 
+> Nota: el trace plot con el rank plot juntos
 
+En el rank plot se tiene que observar que sean uniformes las columnas
+para observar si hubo una buena convergencia
 
+*"El de arriba muestra unas cadenas relativamente sanas, ya que los rangos se distribuyen de forma relativamente uniforme (lo que significa que una cadena no tiene valores más altos que otra durante un largo periodo de tiempo)"*
 
+```{r rank plot}
+mcmc_rank_hist(model2,pars = name[5:8], ref_line = T)
+mcmc_dens_overlay(model2, pars=name[1:6])
+```
 
+## Energy plot
 
+Las energías exploradas por una cadena de Markov hamiltoniana pueden utilizarse para visualizar tanto la densidad de transición de energía
+de transición, π(E | q), y la distribución de energía marginal, π(E). (a) Cuando estas distribuciones están
+Cuando estas distribuciones están bien ajustadas, la cadena de Markov hamiltoniana debería funcionar con solidez, (b) pero si la densidad de transiciones de energía
+es significativamente más estrecha que la distribución de energía marginal, entonces la cadena puede no ser capaz de explorar completamente
+explorar las colas de la distribución objetivo.
+
+```{r Energy Plot}
+mcmc_nuts_energy(np2)
+```
+
+# Modelo 3:
+
+Aqui podemos ver como nuestro modelo tienen buenas convergencias y se ajusta de una manera apropiada a la distribución final de los datos, pero sus parametros no son nada significativos por lo que haremos un segundo modelo para porbar si teneiendo todas nuestras variables de manera categorica podremos encontrar mejores resultados en el modelo y el tiempo de ejecución de las iteraciones
+
+```{r}
+df0$age_c %>% cut(breaks= 17, include.lowest=T)
+
+df0 %>% ggplot(aes(x=age_c))+geom_bar()
+```
 
 
 
