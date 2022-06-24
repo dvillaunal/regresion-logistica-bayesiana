@@ -1,22 +1,14 @@
- Family: bernoulli 
-  Links: mu = logit 
-Formula: cancer_c ~ age_c + assess_c + famhx_c 
-   Data: df.f (Number of observations: 40000) 
-  Draws: 3 chains, each with iter = 15000; warmup = 3000; thin = 1;
-         total post-warmup draws = 36000
-
-Population-Level Effects: 
-          Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-Intercept     0.22      0.07     0.09     0.36 1.00    18162    24725
-age_c        -0.04      0.00    -0.04    -0.04 1.00    37718    30669
-assess_c1    -0.69      0.06    -0.80    -0.58 1.00    14887    20714
-assess_c2    -0.38      0.06    -0.49    -0.26 1.00    15362    20785
-assess_c3     0.01      0.06    -0.11     0.13 1.00    15514    21483
-assess_c4    -0.00      0.06    -0.12     0.12 1.00    15703    21377
-assess_c5     0.09      0.07    -0.05     0.23 1.00    17730    23069
-famhx_c1      0.42      0.04     0.35     0.50 1.00    23833    25637
-famhx_c9      0.54      0.04     0.47     0.62 1.00    24163    25320
-
-Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
-and Tail_ESS are effective sample size measures, and Rhat is the potential
-scale reduction factor on split chains (at convergence, Rhat = 1).
+Parametro       mean   se_mean  sd      2.5%      25%      50%      75%    97.5%  n_eff  Rhat
+b_Intercept     -2.81    0.00  0.37    -3.56    -3.06    -2.80    -2.56    -2.11  24693    1
+b_age_c         -0.03    0.00  0.00    -0.03    -0.03    -0.03    -0.02    -0.02  58347    1
+b_assess_c1     -1.07    0.00  0.10    -1.26    -1.13    -1.07    -1.00    -0.88  21333    1
+b_assess_c2     -0.71    0.00  0.10    -0.90    -0.78    -0.71    -0.64    -0.52  21055    1
+b_assess_c3     -0.46    0.00  0.10    -0.65    -0.52    -0.46    -0.39    -0.26  21854    1
+b_assess_c4     -0.31    0.00  0.10    -0.50    -0.37    -0.31    -0.24    -0.12  21441    1
+b_assess_c5     -0.48    0.00  0.12    -0.73    -0.57    -0.48    -0.40    -0.24  27003    1
+b_famhx_c1       0.16    0.00  0.07     0.03     0.12     0.16     0.21     0.30  39451    1
+b_famhx_c9       0.06    0.00  0.08    -0.08     0.01     0.06     0.11     0.21  38102    1
+b_density_c2     1.20    0.00  0.29     0.67     1.00     1.18     1.38     1.80  21183    1
+b_density_c3     0.64    0.00  0.31     0.06     0.43     0.63     0.84     1.28  21740    1
+b_density_c4    -0.80    0.00  0.85    -2.69    -1.30    -0.71    -0.20     0.64  30663    1
+b_bmi_c          0.00    0.00  0.01    -0.01     0.00     0.00     0.01     0.02  52375    1
