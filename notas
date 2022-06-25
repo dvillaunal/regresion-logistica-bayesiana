@@ -12,3 +12,18 @@ b_density_c2     1.20    0.00  0.29     0.67     1.00     1.18     1.38     1.80
 b_density_c3     0.64    0.00  0.31     0.06     0.43     0.63     0.84     1.28  21740    1
 b_density_c4    -0.80    0.00  0.85    -2.69    -1.30    -0.71    -0.20     0.64  30663    1
 b_bmi_c          0.00    0.00  0.01    -0.01     0.00     0.00     0.01     0.02  52375    1
+
+
+Parametro      odds_ratio
+age_c            1.027  
+assess_c|1       2.906  
+assess_c|2       2.032  
+assess_c|3       1.577  
+assess_c|4       1.362  
+assess_c|5       1.616  
+density_c|2      0.313  
+density_c|3      0.542  
+density_c|4      1.775  
+famhx_c|1        0.848  
+famhx_c|9        0.937  
+bmi_c            0.995
