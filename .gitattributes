@@ -1,0 +1,10 @@
+
+# Que GitHub muestre el lenguaje real (R/Python) y no los informes renderizados
+*.html linguist-generated=true
+*_files/** linguist-vendored=true
+_site/** linguist-vendored=true
+site_libs/** linguist-vendored=true
+libs/** linguist-vendored=true
+*.css linguist-vendored=true
+*.js linguist-vendored=true
+*.tex linguist-generated=true
